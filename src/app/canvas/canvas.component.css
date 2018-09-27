@@ -1,0 +1,9 @@
+.banner { 
+    height: 50px; 
+    background-color: #132257; 
+    color: white;
+}
+
+.h1 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
