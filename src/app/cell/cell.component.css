@@ -1,0 +1,8 @@
+.Cell {
+    height: 30px;
+    width: 30px;
+    border-style: solid;
+    float: left;
+    margin: 0.5px;
+    text-align: center;
+}
