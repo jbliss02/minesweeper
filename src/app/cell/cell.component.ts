@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Cell } from '../../domain-model/cell';
 
 @Component({
@@ -6,7 +6,7 @@ import { Cell } from '../../domain-model/cell';
   templateUrl: './cell.component.html',
   styleUrls: ['./cell.component.css']
 })
-export class CellComponent implements OnInit {
+export class CellComponent {
 
   @Input() Row: number;
   @Input() Col: number;
@@ -14,20 +14,21 @@ export class CellComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
-  }
-
   MineClick(e: any) {
-    console.log(e.currentTarget.id);
+    this.Cell.IsHidden = false;
   }
 
   GetMineText(): string {
 
-    // if (this.Hidden) {
-    //   return 'H';
-    // } else {
-    //   return 'U';
-    // }
+    if (this.Cell.IsHidden) {
+      return 'H';
+    }
+
+    if (this.Cell.HasMine) {
+      return 'M';
+    }
+
+    return 'E';
   }
 
 }
