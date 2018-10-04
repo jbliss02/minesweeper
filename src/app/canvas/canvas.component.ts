@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Cell } from '../../domain-model/cell';
+import { Row } from '../../domain-model/row';
 
 @Component({
   selector: 'app-canvas',
@@ -12,27 +13,27 @@ export class CanvasComponent implements OnInit {
   Cols = 10;
   MineDensity = 0.1;
 
-  Cells: Array<Cell>;
+  Map: Array<Row>;
 
   constructor() {
 
-    this.SetupCells(this.Rows, this.Cols);
+    this.SetupMap(this.Rows, this.Cols);
 
   }
 
   ngOnInit() {
   }
 
-  SetupCells(Rows: number, Cols: number) {
+  SetupMap(Rows: number, Cols: number) {
 
-    this.Cells = new Array<Cell>(Cols);
+    this.Map = new Array<Row>(Rows);
 
-    for (let i = 0; i < Cols; i++) {
-      this.Cells[i] = new Cell();
-      this.Cells[i].Col = i;
+    for (let i = 0; i < Rows; i++) {
+      this.Map[i] = new Row();
+      this.Map[i].Cells = new Array<Cell>(Cols);
 
-      if (i % 2 === 0) {
-        this.Cells[i].HasMine = true;
+      for (let n = 0; n < Cols; n++) {
+        this.Map[i].Cells[n] = new Cell();
       }
     }
   }

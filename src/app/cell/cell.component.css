@@ -10,3 +10,7 @@
 .MineText {
     vertical-align: middle;
 }
+
+.row {
+    display: block;
+}

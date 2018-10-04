@@ -1,4 +1,6 @@
-<app-cell *ngFor="let cell of Cells" [Cell]=cell [Row]=cell.Row [Col]=cell.Col>
+<div class="row" *ngFor="let row of Map">
 
+    <app-cell *ngFor="let cell of row.Cells" [Cell]=cell [Row]=row [Col]=cell.Col>
+    </app-cell>
 
-</app-cell>
+</div>
