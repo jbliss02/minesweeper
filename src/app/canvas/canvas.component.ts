@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { Cell } from '../../domain-model/cell';
+import { Component, OnInit, inject, Injectable } from '@angular/core';
 import { Row } from '../../domain-model/row';
+import { CanvasService } from './canvas.service';
 
 @Component({
   selector: 'app-canvas',
   templateUrl: './canvas.component.html',
-  styleUrls: ['./canvas.component.css']
+  styleUrls: ['./canvas.component.css'],
+  providers: [CanvasService]
 })
+
 export class CanvasComponent implements OnInit {
 
   Rows = 10;
@@ -15,8 +17,10 @@ export class CanvasComponent implements OnInit {
 
   Map: Array<Row>;
 
-  constructor() {
+  private canvasService: CanvasService;
 
+  constructor(canvasService: CanvasService) {
+    this.canvasService = canvasService;
     this.SetupMap(this.Rows, this.Cols);
 
   }
@@ -26,16 +30,7 @@ export class CanvasComponent implements OnInit {
 
   SetupMap(Rows: number, Cols: number) {
 
-    this.Map = new Array<Row>(Rows);
-
-    for (let i = 0; i < Rows; i++) {
-      this.Map[i] = new Row();
-      this.Map[i].Cells = new Array<Cell>(Cols);
-
-      for (let n = 0; n < Cols; n++) {
-        this.Map[i].Cells[n] = new Cell();
-      }
-    }
+    this.Map = this.canvasService.GetMap(this.Rows, this.Cols);
   }
 
 }

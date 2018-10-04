@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { CanvasComponent } from './canvas/canvas.component';
 import { RouterModule, Routes } from '@angular/router';
 import { CellComponent } from './cell/cell.component';
+import { CanvasService } from './canvas/canvas.service';
 
 
 const appRoutes: Routes = [
@@ -24,7 +25,9 @@ const appRoutes: Routes = [
   imports: [
     BrowserModule
   ],
-  providers: [],
+  providers: [
+    CanvasService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
