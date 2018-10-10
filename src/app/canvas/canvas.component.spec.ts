@@ -1,25 +1,33 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { CanvasComponent } from './canvas.component';
+import { CanvasService, ICanvasService } from './canvas.service';
+import { Row } from '../../domain-model/row';
+import { ArrayType } from '@angular/compiler';
 
-describe('CanvasComponent', () => {
-  let component: CanvasComponent;
-  let fixture: ComponentFixture<CanvasComponent>;
+describe('CanvasService', () => {
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ CanvasComponent ]
-    })
-    .compileComponents();
-  }));
+  describe('GetMap', () => {
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(CanvasComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+      let canvasService: ICanvasService;
+      let nCol: number;
+      let nRow: number;
+      let row: Row;
+      let testMap: Array<Row>;
+
+      beforeEach(() => {
+        this.canvasService = new CanvasService();
+        this.nCol = 11;
+        this.nRow = 12;
+        this.testMap = new Array<Row>(this.nRow);
+        this.row = new Row();
+      });
+
+      it('should return array', () => {
+
+        expect(this.canvasService.GetMap(this.nRow, this.nCol)).toBeTruthy();
+        expect(this.canvasService.GetMap(this.nRow, this.nCol)).toEqual(jasmine.any(Array));
+        expect(this.canvasService.GetMap(this.nRow, this.nCol)).toContain(jasmine.objectContaining(this.row));
+      });
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
 });
