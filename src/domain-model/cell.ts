@@ -3,4 +3,5 @@ export class Cell {
     public Col: number;
     public HasMine: boolean;
     public IsHidden = true;
+    public AdjacentMines: number;
 }

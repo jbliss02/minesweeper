@@ -3,7 +3,7 @@ import { Row } from '../../domain-model/row';
 import { Cell } from '../../domain-model/cell';
 
 export interface ICanvasService {
-    GetMap(Rows: number, Cols: number): Array<Row>;
+    GetMap(Rows: number, Cols: number, MineDensity: number): Array<Row>;
 }
 
 @Injectable({
@@ -11,7 +11,7 @@ export interface ICanvasService {
   })
 export class CanvasService implements ICanvasService {
 
-    public GetMap(Rows: number, Cols: number): Array<Row> {
+    public GetMap(Rows: number, Cols: number, MineDensity: number): Array<Row> {
 
         const result = new Array<Row>(Rows);
 
@@ -24,6 +24,13 @@ export class CanvasService implements ICanvasService {
           }
         }
 
+        this.PlantMines(result, MineDensity);
         return result;
+    }
+
+    private PlantMines (Map: Array<Row>, MineDensity: number) {
+
+        const nMines = (Map.length * Map[0].Cells.length) * MineDensity;
+        const locations = Array<number>(nMines);
     }
 }

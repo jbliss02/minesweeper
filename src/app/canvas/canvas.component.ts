@@ -13,7 +13,7 @@ export class CanvasComponent implements OnInit {
 
   Rows = 10;
   Cols = 10;
-  MineDensity = 0.1;
+  MineDensity = 0.22;
 
   Map: Array<Row>;
 
@@ -21,16 +21,16 @@ export class CanvasComponent implements OnInit {
 
   constructor(canvasService: CanvasService) {
     this.canvasService = canvasService;
-    this.SetupMap(this.Rows, this.Cols);
+    this.SetupMap();
 
   }
 
   ngOnInit() {
   }
 
-  SetupMap(Rows: number, Cols: number) {
+  SetupMap() {
 
-    this.Map = this.canvasService.GetMap(this.Rows, this.Cols);
+    this.Map = this.canvasService.GetMap(this.Rows, this.Cols, this.MineDensity);
   }
 
 }

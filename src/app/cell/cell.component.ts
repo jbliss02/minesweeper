@@ -12,10 +12,26 @@ export class CellComponent {
   @Input() Col: number;
   @Input() Cell: Cell;
 
-  constructor() { }
+  MineClass: string;
+
+  constructor() {
+
+      this.MineClass = 'Cell Hidden';
+  }
 
   MineClick(e: any) {
     this.Cell.IsHidden = false;
+    this.SetCellClass();
+  }
+
+  SetCellClass() {
+
+    if (this.Cell.IsHidden) {
+      this.MineClass = 'Cell Hidden';
+    } else {
+      this.MineClass = 'Cell Visible';
+    }
+
   }
 
   GetMineText(): string {
@@ -28,7 +44,7 @@ export class CellComponent {
       return 'M';
     }
 
-    return 'E';
+    return '';
   }
 
 }
