@@ -24,21 +24,23 @@ export class CellComponent {
     this.SetCellClass();
   }
 
-  SetCellClass() {
+  public GetCellClass(): string {
+    return 'Cell Visible';
+  }
+
+  public SetCellClass() {
 
     if (this.Cell.IsHidden) {
       this.MineClass = 'Cell Hidden';
     } else {
       this.MineClass = 'Cell Visible';
     }
+    this.MineClass = 'Cell Visible';
 
   }
 
-  GetMineText(): string {
 
-    if (this.Cell.IsHidden) {
-      return 'H';
-    }
+  GetMineText(): string {
 
     if (this.Cell.HasMine) {
       return 'M';

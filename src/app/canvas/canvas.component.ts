@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, Injectable } from '@angular/core';
 import { Row } from '../../domain-model/row';
 import { CanvasService } from './canvas.service';
+import { forEach } from '@angular/router/src/utils/collection';
 
 @Component({
   selector: 'app-canvas',
@@ -33,4 +34,11 @@ export class CanvasComponent implements OnInit {
     this.Map = this.canvasService.GetMap(this.Rows, this.Cols, this.MineDensity);
   }
 
+  UncoverAll() {
+
+      this.Map.forEach(x => x.Cells.forEach(y => {
+        y.IsHidden = false;
+      }));
+  }
 }
+

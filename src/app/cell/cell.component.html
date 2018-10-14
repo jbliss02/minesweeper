@@ -1,3 +1,6 @@
-<div id={{Row}}:{{Col}} [class]="MineClass" (click)="MineClick($event);">
+<!-- <div id={{Row}}:{{Col}} [class]="MineClass" (click)="MineClick($event);">
+    <label>{{GetMineText()}}</label>
+</div> -->
+<div id={{Row}}:{{Col}} [class]="GetCellClass()" (click)="MineClick($event);">
     <label>{{GetMineText()}}</label>
 </div>
