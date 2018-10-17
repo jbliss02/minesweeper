@@ -27,6 +27,7 @@ export class CanvasService implements ICanvasService {
           }
 
         this.PlantMines(result, MineDensity);
+        this.SetAdjacentMines(result);
         return result;
     }
 
@@ -59,7 +60,114 @@ export class CanvasService implements ICanvasService {
         return mineCount;
     }
 
-    private SetAdjacentMines(Map: Array<Row>, locations: Array<number>) {
+    private SetAdjacentMines(Map: Array<Row>) {
 
+        for (let row = 0; row < Map.length; row++) {
+
+            for (let cell = 0; cell < Map[row].Cells.length; cell++) {
+
+                if (Map[row].Cells[cell].HasMine) {
+                    continue;
+                }
+
+                this.SetMinesToLeft(Map, row, cell);
+                this.SetMinesToRight(Map, row, cell);
+                this.SetMinesToBottom(Map, row, cell);
+                this.SetMinesToTop(Map, row, cell);
+                this.SetMinesToTopRight(Map, row, cell);
+                this.SetMinesToTopLeft(Map, row, cell);
+                this.SetMinesToBottomRight(Map, row, cell);
+                this.SetMinesToBottomLeft(Map, row, cell);
+            }
+        }
+
+    }
+
+    private SetMinesToLeft(Map: Array<Row>, row: number, cell: number) {
+
+        if (cell === 0) {
+            return;
+        }
+
+        if (Map[row].Cells[cell - 1].HasMine) {
+            Map[row].Cells[cell].AdjacentMines++;
+        }
+    }
+
+    private SetMinesToRight(Map: Array<Row>, row: number, cell: number) {
+
+        if (cell === Map[row].Cells.length - 1) {
+            return;
+        }
+
+        if (Map[row].Cells[cell + 1].HasMine) {
+            Map[row].Cells[cell].AdjacentMines++;
+        }
+    }
+
+    private SetMinesToBottom(Map: Array<Row>, row: number, cell: number) {
+
+        if (row === Map.length - 1) {
+            return;
+        }
+
+        if (Map[row + 1].Cells[cell].HasMine) {
+            Map[row].Cells[cell].AdjacentMines++;
+        }
+    }
+
+    private SetMinesToTop(Map: Array<Row>, row: number, cell: number) {
+
+        if (row === 0) {
+            return;
+        }
+
+        if (Map[row - 1].Cells[cell].HasMine) {
+            Map[row].Cells[cell].AdjacentMines++;
+        }
+    }
+
+    private SetMinesToTopRight(Map: Array<Row>, row: number, cell: number) {
+
+        if (row === 0 || cell === Map[row].Cells.length - 1) {
+            return;
+        }
+
+        if (Map[row - 1].Cells[cell + 1].HasMine) {
+            Map[row].Cells[cell].AdjacentMines++;
+        }
+    }
+
+    private SetMinesToTopLeft(Map: Array<Row>, row: number, cell: number) {
+
+        if (row === 0 || cell === 0) {
+            return;
+        }
+
+        if (Map[row - 1].Cells[cell - 1].HasMine) {
+            Map[row].Cells[cell].AdjacentMines++;
+        }
+    }
+
+    private SetMinesToBottomRight(Map: Array<Row>, row: number, cell: number) {
+
+        if (row === Map.length - 1 || cell === Map[row].Cells.length - 1) {
+            return;
+        }
+
+        if (Map[row + 1].Cells[cell + 1].HasMine) {
+            Map[row].Cells[cell].AdjacentMines++;
+        }
+    }
+
+    private SetMinesToBottomLeft(Map: Array<Row>, row: number, cell: number) {
+
+        if (row === Map.length - 1 || cell === 0) {
+            return;
+        }
+
+        if (Map[row + 1].Cells[cell - 1].HasMine) {
+            Map[row].Cells[cell].AdjacentMines++;
+        }
     }
 }

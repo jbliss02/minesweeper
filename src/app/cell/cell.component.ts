@@ -38,9 +38,13 @@ export class CellComponent {
 
     if (this.Cell.HasMine) {
       return 'M';
+    } else if (this.Cell.AdjacentMines > 0) {
+      return this.Cell.AdjacentMines.toString();
+    } else {
+      return '';
     }
 
-    return '';
+
   }
 
 }
