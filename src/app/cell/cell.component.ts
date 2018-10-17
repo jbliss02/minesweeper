@@ -20,25 +20,19 @@ export class CellComponent {
   }
 
   MineClick(e: any) {
+
     this.Cell.IsHidden = false;
-    this.SetCellClass();
   }
 
   public GetCellClass(): string {
-    return 'Cell Visible';
-  }
-
-  public SetCellClass() {
 
     if (this.Cell.IsHidden) {
-      this.MineClass = 'Cell Hidden';
+      return 'Cell Hidden';
     } else {
-      this.MineClass = 'Cell Visible';
+      return 'Cell Visible';
     }
-    this.MineClass = 'Cell Visible';
 
   }
-
 
   GetMineText(): string {
 

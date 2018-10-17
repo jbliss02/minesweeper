@@ -42,7 +42,6 @@ export class CanvasService implements ICanvasService {
 
             const location = Math.floor(Math.random() * Math.floor(cells));
             allocated = this.PlantMine(Map, locations, location, allocated);
-
         }
     }
 
@@ -53,15 +52,14 @@ export class CanvasService implements ICanvasService {
             const row = Math.floor(location / Map.length);
             const col = Math.floor(location - (row * Map.length));
 
-            console.log(location);
-            console.log(row);
-            console.log(col);
-            console.log('---');
-
             Map[row].Cells[col].HasMine = true;
             locations.push(location);
             mineCount++;
         }
         return mineCount;
+    }
+
+    private SetAdjacentMines(Map: Array<Row>, locations: Array<number>) {
+
     }
 }

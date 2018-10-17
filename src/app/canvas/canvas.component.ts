@@ -21,9 +21,9 @@ export class CanvasComponent implements OnInit {
   private canvasService: CanvasService;
 
   constructor(canvasService: CanvasService) {
+
     this.canvasService = canvasService;
     this.SetupMap();
-
   }
 
   ngOnInit() {
@@ -34,11 +34,11 @@ export class CanvasComponent implements OnInit {
     this.Map = this.canvasService.GetMap(this.Rows, this.Cols, this.MineDensity);
   }
 
-  UncoverAll() {
+  RevealAll() {
 
-      this.Map.forEach(x => x.Cells.forEach(y => {
-        y.IsHidden = false;
-      }));
+    this.Map.forEach(x => x.Cells.forEach(y => {
+      y.IsHidden = false;
+    }));
   }
 }
 
