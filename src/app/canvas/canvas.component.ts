@@ -17,6 +17,7 @@ export class CanvasComponent implements OnInit {
   MineDensity = 0.22;
 
   Map: Array<Row>;
+  GameOver = false;
 
   private canvasService: CanvasService;
 
@@ -39,6 +40,22 @@ export class CanvasComponent implements OnInit {
     this.Map.forEach(x => x.Cells.forEach(y => {
       y.IsHidden = false;
     }));
+  }
+
+  public OnCellClick($event): any {
+
+    const cell = this.canvasService.GetCell(this.Map, $event);
+
+    if (cell.HasMine !== undefined && cell.HasMine === true) {
+      this.GameOver = true;
+      console.log('Bang!');
+      return;
+    }
+
+    const toClear = this.canvasService.GetAdjacentEmptyCells(this.Map, $event);
+
+    toClear.forEach(x => x.IsHidden = false);
+
   }
 }
 

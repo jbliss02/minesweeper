@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, EventEmitter, Output } from '@angular/core';
 import { Cell } from '../../domain-model/cell';
 
 @Component({
@@ -12,6 +12,8 @@ export class CellComponent {
   @Input() Col: number;
   @Input() Cell: Cell;
 
+  @Output() OnCellClick: EventEmitter<number> = new EventEmitter();
+
   MineClass: string;
 
   constructor() {
@@ -22,6 +24,7 @@ export class CellComponent {
   MineClick(e: any) {
 
     this.Cell.IsHidden = false;
+    this.OnCellClick.emit(this.Cell.ID);
   }
 
   public GetCellClass(): string {
@@ -43,7 +46,6 @@ export class CellComponent {
     } else {
       return '';
     }
-
 
   }
 
