@@ -5,4 +5,5 @@ export class Cell {
     public HasMine = false;
     public IsHidden = true;
     public AdjacentMines = 0;
+    public IsFlagged = false;
 }

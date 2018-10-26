@@ -12,7 +12,8 @@ export class CellComponent {
   @Input() Col: number;
   @Input() Cell: Cell;
 
-  @Output() OnCellClick: EventEmitter<number> = new EventEmitter();
+  @Output() OnCellClick: EventEmitter<Cell> = new EventEmitter();
+  @Output() OnCellFlag: EventEmitter<Cell> = new EventEmitter();
 
   MineClass: string;
 
@@ -24,12 +25,20 @@ export class CellComponent {
   MineClick(e: any) {
 
     this.Cell.IsHidden = false;
-    this.OnCellClick.emit(this.Cell.ID);
+    this.OnCellClick.emit(this.Cell);
+  }
+
+  OnCellRightClick(e: any) {
+
+    this.Cell.IsFlagged = !this.Cell.IsFlagged;
+    this.OnCellFlag.emit(this.Cell);
   }
 
   public GetCellClass(): string {
 
-    if (this.Cell.IsHidden) {
+    if (this.Cell.IsFlagged) {
+      return 'Cell Flagged';
+    } else if (this.Cell.IsHidden) {
       return 'Cell Hidden';
     } else {
       return 'Cell Visible';

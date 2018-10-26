@@ -2,6 +2,8 @@ import { Component, OnInit, inject, Injectable } from '@angular/core';
 import { Row } from '../../domain-model/row';
 import { CanvasService } from './canvas.service';
 import { forEach } from '@angular/router/src/utils/collection';
+import { runInThisContext } from 'vm';
+import { Cell } from 'src/domain-model/cell';
 
 @Component({
   selector: 'app-canvas',
@@ -14,7 +16,7 @@ export class CanvasComponent implements OnInit {
 
   Rows = 10;
   Cols = 10;
-  MineDensity = 0.22;
+  MineDensity = 0.1;
 
   Map: Array<Row>;
   GameOver = false;
@@ -28,6 +30,8 @@ export class CanvasComponent implements OnInit {
   }
 
   ngOnInit() {
+
+    this.DisableRightClickContextMenu();
   }
 
   SetupMap() {
@@ -37,25 +41,46 @@ export class CanvasComponent implements OnInit {
 
   RevealAll() {
 
-    this.Map.forEach(x => x.Cells.forEach(y => {
-      y.IsHidden = false;
-    }));
+    this.canvasService.RevealAllCells(this.Map);
   }
 
   public OnCellClick($event): any {
 
-    const cell = this.canvasService.GetCell(this.Map, $event);
+      if ($event.HasMine !== undefined && $event.HasMine === true) {
+        this.DoGameOver();
+        return;
+      }
 
-    if (cell.HasMine !== undefined && cell.HasMine === true) {
-      this.GameOver = true;
-      console.log('Bang!');
-      return;
-    }
+      if ($event.AdjacentMines === 0) {
+        this.canvasService.ShowAdjacentEmptyCells(this.Map, $event.ID);
+      }
 
-    const toClear = this.canvasService.GetAdjacentEmptyCells(this.Map, $event);
+  }
 
-    toClear.forEach(x => x.IsHidden = false);
+  public OnCellFlag($event) {
 
+    console.log('right click');
+  }
+
+  public NewGame() {
+
+    this.Map = this.canvasService.GetMap(this.Rows, this.Cols, this.MineDensity);
+  }
+
+  private DoGameOver(): void {
+
+    this.GameOver = true;
+    this.RevealAll();
+    console.log('Bang!');
+  }
+
+  private DisableRightClickContextMenu() {
+
+    window.oncontextmenu = function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    };
   }
 }
 

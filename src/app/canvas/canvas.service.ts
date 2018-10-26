@@ -3,12 +3,14 @@ import { Row } from '../../domain-model/row';
 import { Cell } from '../../domain-model/cell';
 import { HammerGestureConfig } from '@angular/platform-browser';
 import { mapChildrenIntoArray } from '@angular/router/src/url_tree';
+import { CloneVisitor } from '@angular/compiler/src/i18n/i18n_ast';
 
 
 export interface ICanvasService {
     GetMap(Rows: number, Cols: number, MineDensity: number): Array<Row>;
     GetCell (Map: Array<Row>, CellID: number): Cell;
-    GetAdjacentEmptyCells(Map: Array<Row>, CellID: number): Array<Cell>;
+    ShowAdjacentEmptyCells(Map: Array<Row>, CellID: number);
+    RevealAllCells(Map: Array<Row>);
 }
 
 @Injectable({
@@ -62,26 +64,22 @@ export class CanvasService implements ICanvasService {
         return result; // JB - Throw error
     }
 
-    private GetCellFromCoordinates (Map: Array<Row>, rowID: number, colID: number): Cell {
+    public RevealAllCells(Map: Array<Row>) {
 
-        let result: Cell;
-        Map.forEach(row => {
-
-            const cell = row.Cells.find(x => x.Row === rowID && x.Col === colID);
-
-            if (cell !== undefined) {
-                result = cell;
-            }
-        });
-
-        return result; // JB - Throw error
+        Map.forEach(x => x.Cells.forEach(y => {
+            y.IsHidden = false;
+          }));
     }
 
-    public GetAdjacentEmptyCells(Map: Array<Row>, CellID: number): Array<Cell> {
+    private GetCellFromCoordinates (Map: Array<Row>, rowID: number, colID: number): Cell {
 
-        const adjacent = this.GetAdjacentCells(Map, CellID);
-        return this.GetAdjacentCells(Map, CellID).filter(x => x.HasMine === false && x.AdjacentMines === 0);
+        return Map[rowID].Cells[colID];
+    }
 
+    public ShowAdjacentEmptyCells(Map: Array<Row>, CellID: number): void {
+
+        const empty = this.GetAdjacentCells(Map, CellID).filter(x => x.HasMine === false && x.AdjacentMines === 0);
+        empty.forEach(x => x.IsHidden = false);
     }
 
     private GetAdjacentCells(Map: Array<Row>, CellID: number): Array<Cell> {
@@ -131,7 +129,6 @@ export class CanvasService implements ICanvasService {
         }
 
         return result;
-
     }
 
     private PlantMines (Map: Array<Row>, MineDensity: number) {
