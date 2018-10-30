@@ -2,8 +2,8 @@ import { Component, OnInit, inject, Injectable } from '@angular/core';
 import { Row } from '../../domain-model/row';
 import { CanvasService } from './canvas.service';
 import { forEach } from '@angular/router/src/utils/collection';
-import { runInThisContext } from 'vm';
 import { Cell } from 'src/domain-model/cell';
+import { ThrowStmt } from '@angular/compiler';
 
 @Component({
   selector: 'app-canvas',
@@ -17,6 +17,7 @@ export class CanvasComponent implements OnInit {
   Rows = 10;
   Cols = 10;
   MineDensity = 0.1;
+  MinesLeft: number;
 
   Map: Array<Row>;
   GameOver = false;
@@ -37,6 +38,8 @@ export class CanvasComponent implements OnInit {
   SetupMap() {
 
     this.Map = this.canvasService.GetMap(this.Rows, this.Cols, this.MineDensity);
+
+    /// TODO - Extend Map so is not just an array of rows but object that holds other properties
   }
 
   RevealAll() {
@@ -57,9 +60,13 @@ export class CanvasComponent implements OnInit {
 
   }
 
-  public OnCellFlag($event) {
+  public OnCellFlag($event): any {
 
-    console.log('right click');
+    if ($event.IsFlagged) {
+      this.MinesLeft--;
+    } else {
+      this.MinesLeft--;
+    }
   }
 
   public NewGame() {

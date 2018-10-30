@@ -28,7 +28,7 @@ export class CellComponent {
     this.OnCellClick.emit(this.Cell);
   }
 
-  OnCellRightClick(e: any) {
+  CellFlag(e: any) {
 
     this.Cell.IsFlagged = !this.Cell.IsFlagged;
     this.OnCellFlag.emit(this.Cell);

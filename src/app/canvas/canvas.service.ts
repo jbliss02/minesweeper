@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Row } from '../../domain-model/row';
 import { Cell } from '../../domain-model/cell';
-import { HammerGestureConfig } from '@angular/platform-browser';
-import { mapChildrenIntoArray } from '@angular/router/src/url_tree';
-import { CloneVisitor } from '@angular/compiler/src/i18n/i18n_ast';
-
 
 export interface ICanvasService {
     GetMap(Rows: number, Cols: number, MineDensity: number): Array<Row>;
@@ -78,8 +74,32 @@ export class CanvasService implements ICanvasService {
 
     public ShowAdjacentEmptyCells(Map: Array<Row>, CellID: number): void {
 
-        const empty = this.GetAdjacentCells(Map, CellID).filter(x => x.HasMine === false && x.AdjacentMines === 0);
-        empty.forEach(x => x.IsHidden = false);
+        let empty = this.GetAdjacentCells(Map, CellID).filter(x => x.HasMine === false && x.IsFlagged === false && x.AdjacentMines === 0);
+
+        do {
+            empty.forEach(x => {
+                x.IsHidden = false;
+            });
+
+            empty = empty.concat(this.GetAdjacentCellsFromArray(Map, empty));
+
+        } while (empty.some(x => x.IsHidden === true));
+
+    }
+
+    private GetAdjacentCellsFromArray(Map: Array<Row>, Cells: Array<Cell>): Array<Cell> {
+
+        let emptyCells = new Array<Cell>();
+
+        Cells.forEach(x => {
+
+            const em =  this.GetAdjacentCells(Map, x.ID);
+            emptyCells = emptyCells.concat(em);
+
+        });
+
+        // TODO: Remove duplicates
+        return emptyCells.filter(x => x.HasMine === false && x.IsFlagged === false && x.AdjacentMines === 0 && x.IsHidden === true);
     }
 
     private GetAdjacentCells(Map: Array<Row>, CellID: number): Array<Cell> {
@@ -99,27 +119,27 @@ export class CanvasService implements ICanvasService {
         }
 
         // top right
-        if (cell.Row > 0 && cell.Col < Map.length) {
+        if (cell.Row > 0 && cell.Col < Map[0].Cells.length - 1) {
             result.push(this.GetCellFromCoordinates(Map, cell.Row - 1, cell.Col + 1));
         }
 
         // right
-        if (cell.Col < Map.length) {
+        if (cell.Col < Map[0].Cells.length - 1) {
             result.push(this.GetCellFromCoordinates(Map, cell.Row, cell.Col + 1));
         }
 
         // bottom right
-        if (cell.Row < Map[0].Cells.length && cell.Col < Map.length) {
+        if (cell.Row < Map.length - 1 && cell.Col < Map[0].Cells.length - 1) {
             result.push(this.GetCellFromCoordinates(Map, cell.Row + 1, cell.Col + 1));
         }
 
         // bottom
-        if (cell.Row < Map[0].Cells.length) {
+        if (cell.Row < Map[0].Cells.length - 1) {
             result.push(this.GetCellFromCoordinates(Map, cell.Row + 1, cell.Col));
         }
 
         // bottom left
-        if (cell.Row < Map[0].Cells.length && cell.Col > 0) {
+        if (cell.Row < Map[0].Cells.length - 1 && cell.Col > 0) {
             result.push(this.GetCellFromCoordinates(Map, cell.Row + 1, cell.Col - 1));
         }
 
