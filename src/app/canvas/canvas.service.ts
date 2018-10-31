@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Row } from '../../domain-model/row';
 import { Cell } from '../../domain-model/cell';
+import { GameArea } from 'src/domain-model/game-area';
 
 export interface ICanvasService {
-    GetMap(Rows: number, Cols: number, MineDensity: number): Array<Row>;
-    GetCell (Map: Array<Row>, CellID: number): Cell;
-    ShowAdjacentEmptyCells(Map: Array<Row>, CellID: number);
-    RevealAllCells(Map: Array<Row>);
+    GetNewGameArea(Rows: number, Cols: number, MineDensity: number): GameArea;
+    GetCell (GameArea: GameArea, CellID: number): Cell;
+    ShowAdjacentEmptyCells(GameMap: GameArea, CellID: number);
+    RevealAllCells(GameMap: GameArea);
 }
 
 @Injectable({
@@ -14,41 +15,43 @@ export interface ICanvasService {
   })
 export class CanvasService implements ICanvasService {
 
-    public GetMap(Rows: number, Cols: number, MineDensity: number): Array<Row> {
+    public GetNewGameArea(Rows: number, Cols: number, MineDensity: number): GameArea {
 
-    const result = new Array<Row>(Rows);
+        const result = new GameArea();
+        result.Rows = new Array<Row>(Rows);
 
-    for (let i = 0; i < Rows; i++) {
+        for (let i = 0; i < Rows; i++) {
 
-        result[i] = new Row();
-        result[i].Cells = new Array<Cell>(Cols);
+            result.Rows[i] = new Row();
+            result.Rows[i].Cells = new Array<Cell>(Cols);
 
-        for (let n = 0; n < Cols; n++) {
+            for (let n = 0; n < Cols; n++) {
 
-            result[i].Cells[n] = new Cell();
+                result.Rows[i].Cells[n] = new Cell();
 
-            if (i === 0) {
-                result[i].Cells[n].ID = n;
-            } else if (n === 0) {
-                result[i].Cells[n].ID = result[i - 1].Cells[result[i - 1].Cells.length - 1].ID + 1;
-            } else {
-                result[i].Cells[n].ID = result[i - 1].Cells[result[i - 1].Cells.length - 1].ID + n + 1;
+                if (i === 0) {
+                    result.Rows[i].Cells[n].ID = n;
+                } else if (n === 0) {
+                    result.Rows[i].Cells[n].ID = result.Rows[i - 1].Cells[result.Rows[i - 1].Cells.length - 1].ID + 1;
+                } else {
+                    result.Rows[i].Cells[n].ID = result.Rows[i - 1].Cells[result.Rows[i - 1].Cells.length - 1].ID + n + 1;
+                }
+
+                result.Rows[i].Cells[n].Col = n;
+                result.Rows[i].Cells[n].Row = i;
             }
-
-            result[i].Cells[n].Col = n;
-            result[i].Cells[n].Row = i;
         }
-    }
 
-        this.PlantMines(result, MineDensity);
+        result.NumberMines = (result.Rows.length * result.Rows[0].Cells.length) * MineDensity;
+        this.PlantMines(result, result.NumberMines);
         this.SetAdjacentMines(result);
         return result;
     }
 
-    public GetCell (Map: Array<Row>, CellID: number): Cell {
+    public GetCell (GameMap: GameArea, CellID: number): Cell {
 
         let result: Cell;
-        Map.forEach(row => {
+        GameMap.Rows.forEach(row => {
 
             const cell = row.Cells.find(x => x.ID === CellID);
 
@@ -60,40 +63,41 @@ export class CanvasService implements ICanvasService {
         return result; // JB - Throw error
     }
 
-    public RevealAllCells(Map: Array<Row>) {
+    public RevealAllCells(GameMap: GameArea) {
 
-        Map.forEach(x => x.Cells.forEach(y => {
+        GameMap.Rows.forEach(x => x.Cells.forEach(y => {
             y.IsHidden = false;
           }));
     }
 
-    private GetCellFromCoordinates (Map: Array<Row>, rowID: number, colID: number): Cell {
+    private GetCellFromCoordinates (GameMap: GameArea, rowID: number, colID: number): Cell {
 
-        return Map[rowID].Cells[colID];
+        return GameMap.Rows[rowID].Cells[colID];
     }
 
-    public ShowAdjacentEmptyCells(Map: Array<Row>, CellID: number): void {
+    public ShowAdjacentEmptyCells(GameMap: GameArea, CellID: number): void {
 
-        let empty = this.GetAdjacentCells(Map, CellID).filter(x => x.HasMine === false && x.IsFlagged === false && x.AdjacentMines === 0);
+        // tslint:disable-next-line:max-line-length
+        let empty = this.GetAdjacentCells(GameMap, CellID).filter(x => x.HasMine === false && x.IsFlagged === false && x.AdjacentMines === 0);
 
         do {
             empty.forEach(x => {
                 x.IsHidden = false;
             });
 
-            empty = empty.concat(this.GetAdjacentCellsFromArray(Map, empty));
+            empty = empty.concat(this.GetAdjacentCellsFromArray(GameMap, empty));
 
         } while (empty.some(x => x.IsHidden === true));
 
     }
 
-    private GetAdjacentCellsFromArray(Map: Array<Row>, Cells: Array<Cell>): Array<Cell> {
+    private GetAdjacentCellsFromArray(GameMap: GameArea, Cells: Array<Cell>): Array<Cell> {
 
         let emptyCells = new Array<Cell>();
 
         Cells.forEach(x => {
 
-            const em =  this.GetAdjacentCells(Map, x.ID);
+            const em =  this.GetAdjacentCells(GameMap, x.ID);
             emptyCells = emptyCells.concat(em);
 
         });
@@ -102,192 +106,191 @@ export class CanvasService implements ICanvasService {
         return emptyCells.filter(x => x.HasMine === false && x.IsFlagged === false && x.AdjacentMines === 0 && x.IsHidden === true);
     }
 
-    private GetAdjacentCells(Map: Array<Row>, CellID: number): Array<Cell> {
+    private GetAdjacentCells(GameMap: GameArea, CellID: number): Array<Cell> {
 
-        const result = new Array<Cell>();
+        const rows = new Array<Cell>();
 
-        const cell = this.GetCell(Map, CellID);
+        const cell = this.GetCell(GameMap, CellID);
 
         // top left
         if (cell.Row > 0 && cell.Col > 0) {
-            result.push(this.GetCellFromCoordinates(Map, cell.Row - 1, cell.Col - 1));
+            rows.push(this.GetCellFromCoordinates(GameMap, cell.Row - 1, cell.Col - 1));
         }
 
         // top
         if (cell.Row > 0) {
-            result.push(this.GetCellFromCoordinates(Map, cell.Row - 1, cell.Col));
+            rows.push(this.GetCellFromCoordinates(GameMap, cell.Row - 1, cell.Col));
         }
 
         // top right
-        if (cell.Row > 0 && cell.Col < Map[0].Cells.length - 1) {
-            result.push(this.GetCellFromCoordinates(Map, cell.Row - 1, cell.Col + 1));
+        if (cell.Row > 0 && cell.Col < GameMap.Rows[0].Cells.length - 1) {
+            rows.push(this.GetCellFromCoordinates(GameMap, cell.Row - 1, cell.Col + 1));
         }
 
         // right
-        if (cell.Col < Map[0].Cells.length - 1) {
-            result.push(this.GetCellFromCoordinates(Map, cell.Row, cell.Col + 1));
+        if (cell.Col < GameMap.Rows[0].Cells.length - 1) {
+            rows.push(this.GetCellFromCoordinates(GameMap, cell.Row, cell.Col + 1));
         }
 
         // bottom right
-        if (cell.Row < Map.length - 1 && cell.Col < Map[0].Cells.length - 1) {
-            result.push(this.GetCellFromCoordinates(Map, cell.Row + 1, cell.Col + 1));
+        if (cell.Row < GameMap.Rows.length - 1 && cell.Col < GameMap.Rows[0].Cells.length - 1) {
+            rows.push(this.GetCellFromCoordinates(GameMap, cell.Row + 1, cell.Col + 1));
         }
 
         // bottom
-        if (cell.Row < Map[0].Cells.length - 1) {
-            result.push(this.GetCellFromCoordinates(Map, cell.Row + 1, cell.Col));
+        if (cell.Row < GameMap.Rows[0].Cells.length - 1) {
+            rows.push(this.GetCellFromCoordinates(GameMap, cell.Row + 1, cell.Col));
         }
 
         // bottom left
-        if (cell.Row < Map[0].Cells.length - 1 && cell.Col > 0) {
-            result.push(this.GetCellFromCoordinates(Map, cell.Row + 1, cell.Col - 1));
+        if (cell.Row < GameMap.Rows[0].Cells.length - 1 && cell.Col > 0) {
+            rows.push(this.GetCellFromCoordinates(GameMap, cell.Row + 1, cell.Col - 1));
         }
 
         // left
         if (cell.Col > 0) {
-            result.push(this.GetCellFromCoordinates(Map, cell.Row, cell.Col - 1));
+            rows.push(this.GetCellFromCoordinates(GameMap, cell.Row, cell.Col - 1));
         }
 
-        return result;
+        return rows;
     }
 
-    private PlantMines (Map: Array<Row>, MineDensity: number) {
+    private PlantMines (GameMap: GameArea, nMines: number) {
 
-        const nMines = (Map.length * Map[0].Cells.length) * MineDensity;
         const locations = Array<number>();
-        const cells = Map.length * Map[0].Cells.length;
+        const cells = GameMap.Rows.length * GameMap.Rows[0].Cells.length;
 
         let allocated = 0;
 
         while (allocated < nMines) {
 
             const location = Math.floor(Math.random() * Math.floor(cells));
-            allocated = this.PlantMine(Map, locations, location, allocated);
+            allocated = this.PlantMine(GameMap, locations, location, allocated);
         }
     }
 
-    private PlantMine(Map: Array<Row>, locations: Array<number>, location: number, mineCount: number) {
+    private PlantMine(GameMap: GameArea, locations: Array<number>, location: number, mineCount: number) {
 
         if (!locations.includes(location)) {
 
-            const row = Math.floor(location / Map.length);
-            const col = Math.floor(location - (row * Map.length));
+            const row = Math.floor(location / GameMap.Rows.length);
+            const col = Math.floor(location - (row * GameMap.Rows.length));
 
-            Map[row].Cells[col].HasMine = true;
+            GameMap.Rows[row].Cells[col].HasMine = true;
             locations.push(location);
             mineCount++;
         }
         return mineCount;
     }
 
-    private SetAdjacentMines(Map: Array<Row>) {
+    private SetAdjacentMines(GameMap: GameArea) {
 
-        for (let row = 0; row < Map.length; row++) {
+        for (let row = 0; row < GameMap.Rows.length; row++) {
 
-            for (let cell = 0; cell < Map[row].Cells.length; cell++) {
+            for (let cell = 0; cell < GameMap.Rows[row].Cells.length; cell++) {
 
-                if (Map[row].Cells[cell].HasMine) {
+                if (GameMap.Rows[row].Cells[cell].HasMine) {
                     continue;
                 }
 
-                this.SetMinesToLeft(Map, row, cell);
-                this.SetMinesToRight(Map, row, cell);
-                this.SetMinesToBottom(Map, row, cell);
-                this.SetMinesToTop(Map, row, cell);
-                this.SetMinesToTopRight(Map, row, cell);
-                this.SetMinesToTopLeft(Map, row, cell);
-                this.SetMinesToBottomRight(Map, row, cell);
-                this.SetMinesToBottomLeft(Map, row, cell);
+                this.SetMinesToLeft(GameMap, row, cell);
+                this.SetMinesToRight(GameMap, row, cell);
+                this.SetMinesToBottom(GameMap, row, cell);
+                this.SetMinesToTop(GameMap, row, cell);
+                this.SetMinesToTopRight(GameMap, row, cell);
+                this.SetMinesToTopLeft(GameMap, row, cell);
+                this.SetMinesToBottomRight(GameMap, row, cell);
+                this.SetMinesToBottomLeft(GameMap, row, cell);
             }
         }
 
     }
 
-    private SetMinesToLeft(Map: Array<Row>, row: number, cell: number) {
+    private SetMinesToLeft(GameMap: GameArea, row: number, cell: number) {
 
         if (cell === 0) {
             return;
         }
 
-        if (Map[row].Cells[cell - 1].HasMine) {
-            Map[row].Cells[cell].AdjacentMines++;
+        if (GameMap.Rows[row].Cells[cell - 1].HasMine) {
+            GameMap.Rows[row].Cells[cell].AdjacentMines++;
         }
     }
 
-    private SetMinesToRight(Map: Array<Row>, row: number, cell: number) {
+    private SetMinesToRight(GameMap: GameArea, row: number, cell: number) {
 
-        if (cell === Map[row].Cells.length - 1) {
+        if (cell === GameMap.Rows[row].Cells.length - 1) {
             return;
         }
 
-        if (Map[row].Cells[cell + 1].HasMine) {
-            Map[row].Cells[cell].AdjacentMines++;
+        if (GameMap.Rows[row].Cells[cell + 1].HasMine) {
+            GameMap.Rows[row].Cells[cell].AdjacentMines++;
         }
     }
 
-    private SetMinesToBottom(Map: Array<Row>, row: number, cell: number) {
+    private SetMinesToBottom(GameMap: GameArea, row: number, cell: number) {
 
-        if (row === Map.length - 1) {
+        if (row === GameMap.Rows.length - 1) {
             return;
         }
 
-        if (Map[row + 1].Cells[cell].HasMine) {
-            Map[row].Cells[cell].AdjacentMines++;
+        if (GameMap.Rows[row + 1].Cells[cell].HasMine) {
+            GameMap.Rows[row].Cells[cell].AdjacentMines++;
         }
     }
 
-    private SetMinesToTop(Map: Array<Row>, row: number, cell: number) {
+    private SetMinesToTop(GameMap: GameArea, row: number, cell: number) {
 
         if (row === 0) {
             return;
         }
 
-        if (Map[row - 1].Cells[cell].HasMine) {
-            Map[row].Cells[cell].AdjacentMines++;
+        if (GameMap.Rows[row - 1].Cells[cell].HasMine) {
+            GameMap.Rows[row].Cells[cell].AdjacentMines++;
         }
     }
 
-    private SetMinesToTopRight(Map: Array<Row>, row: number, cell: number) {
+    private SetMinesToTopRight(GameMap: GameArea, row: number, cell: number) {
 
-        if (row === 0 || cell === Map[row].Cells.length - 1) {
+        if (row === 0 || cell === GameMap.Rows[row].Cells.length - 1) {
             return;
         }
 
-        if (Map[row - 1].Cells[cell + 1].HasMine) {
-            Map[row].Cells[cell].AdjacentMines++;
+        if (GameMap.Rows[row - 1].Cells[cell + 1].HasMine) {
+            GameMap.Rows[row].Cells[cell].AdjacentMines++;
         }
     }
 
-    private SetMinesToTopLeft(Map: Array<Row>, row: number, cell: number) {
+    private SetMinesToTopLeft(GameMap: GameArea, row: number, cell: number) {
 
         if (row === 0 || cell === 0) {
             return;
         }
 
-        if (Map[row - 1].Cells[cell - 1].HasMine) {
-            Map[row].Cells[cell].AdjacentMines++;
+        if (GameMap.Rows[row - 1].Cells[cell - 1].HasMine) {
+            GameMap.Rows[row].Cells[cell].AdjacentMines++;
         }
     }
 
-    private SetMinesToBottomRight(Map: Array<Row>, row: number, cell: number) {
+    private SetMinesToBottomRight(GameMap: GameArea, row: number, cell: number) {
 
-        if (row === Map.length - 1 || cell === Map[row].Cells.length - 1) {
+        if (row === GameMap.Rows.length - 1 || cell === GameMap.Rows[row].Cells.length - 1) {
             return;
         }
 
-        if (Map[row + 1].Cells[cell + 1].HasMine) {
-            Map[row].Cells[cell].AdjacentMines++;
+        if (GameMap.Rows[row + 1].Cells[cell + 1].HasMine) {
+            GameMap.Rows[row].Cells[cell].AdjacentMines++;
         }
     }
 
-    private SetMinesToBottomLeft(Map: Array<Row>, row: number, cell: number) {
+    private SetMinesToBottomLeft(GameMap: GameArea, row: number, cell: number) {
 
-        if (row === Map.length - 1 || cell === 0) {
+        if (row === GameMap.Rows.length - 1 || cell === 0) {
             return;
         }
 
-        if (Map[row + 1].Cells[cell - 1].HasMine) {
-            Map[row].Cells[cell].AdjacentMines++;
+        if (GameMap.Rows[row + 1].Cells[cell - 1].HasMine) {
+            GameMap.Rows[row].Cells[cell].AdjacentMines++;
         }
     }
 }

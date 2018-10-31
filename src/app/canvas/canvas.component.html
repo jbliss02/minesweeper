@@ -1,10 +1,11 @@
-<div class="row" *ngFor="let row of Map">
+<div class="row" *ngFor="let row of GameMap.Rows">
     <app-cell (OnCellClick)="OnCellClick($event)" (OnCellFlag)="OnCellFlag($event)" *ngFor="let cell of row.Cells" [Cell]=cell [Row]=row [Col]=cell.Col>
     </app-cell>
 </div>
 <br/>
 <div>
-    <label>{{MinesLeft}}</label>
+    <label>{{GameMap.NumberMines - GameMap.MinesFlagged}}</label>
     <button (click)="RevealAll();">Reveal</button>
     <button (click)="NewGame();">New Game</button>
 </div>
+<img src="../../assets/images/flag.svg">

@@ -4,6 +4,7 @@ import { CanvasService } from './canvas.service';
 import { forEach } from '@angular/router/src/utils/collection';
 import { Cell } from 'src/domain-model/cell';
 import { ThrowStmt } from '@angular/compiler';
+import { GameArea } from 'src/domain-model/game-area';
 
 @Component({
   selector: 'app-canvas',
@@ -17,9 +18,8 @@ export class CanvasComponent implements OnInit {
   Rows = 10;
   Cols = 10;
   MineDensity = 0.1;
-  MinesLeft: number;
 
-  Map: Array<Row>;
+  GameMap: GameArea;
   GameOver = false;
 
   private canvasService: CanvasService;
@@ -37,14 +37,12 @@ export class CanvasComponent implements OnInit {
 
   SetupMap() {
 
-    this.Map = this.canvasService.GetMap(this.Rows, this.Cols, this.MineDensity);
-
-    /// TODO - Extend Map so is not just an array of rows but object that holds other properties
+    this.GameMap = this.canvasService.GetNewGameArea(this.Rows, this.Cols, this.MineDensity);
   }
 
   RevealAll() {
 
-    this.canvasService.RevealAllCells(this.Map);
+    this.canvasService.RevealAllCells(this.GameMap);
   }
 
   public OnCellClick($event): any {
@@ -55,7 +53,7 @@ export class CanvasComponent implements OnInit {
       }
 
       if ($event.AdjacentMines === 0) {
-        this.canvasService.ShowAdjacentEmptyCells(this.Map, $event.ID);
+        this.canvasService.ShowAdjacentEmptyCells(this.GameMap, $event.ID);
       }
 
   }
@@ -63,15 +61,15 @@ export class CanvasComponent implements OnInit {
   public OnCellFlag($event): any {
 
     if ($event.IsFlagged) {
-      this.MinesLeft--;
+      this.GameMap.MinesFlagged++;
     } else {
-      this.MinesLeft--;
+      this.GameMap.MinesFlagged--;
     }
   }
 
   public NewGame() {
 
-    this.Map = this.canvasService.GetMap(this.Rows, this.Cols, this.MineDensity);
+    this.GameMap = this.canvasService.GetNewGameArea(this.Rows, this.Cols, this.MineDensity);
   }
 
   private DoGameOver(): void {

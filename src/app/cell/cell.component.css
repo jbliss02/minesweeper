@@ -26,5 +26,6 @@
 }
 
 .Flagged {
-    background-color: blue;
+    background-image: url(../../assets/images/flag.svg);
+    background-size: auto auto;
 }
